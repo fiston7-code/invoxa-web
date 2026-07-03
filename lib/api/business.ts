@@ -1,5 +1,5 @@
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.fastvoxa.com/v1";
 
 export interface BusinessProfileInput {
   name: string;
@@ -13,7 +13,7 @@ export interface BusinessProfileInput {
 export async function createBusinessProfile(payload: BusinessProfileInput): Promise<any> {
   const token = localStorage.getItem("invoxa_token");
   
-  const response = await fetch(`${API_BASE_URL}/v1/business`, {
+  const response = await fetch(`${API_BASE_URL}/business`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -37,7 +37,7 @@ export async function checkHasBusinessProfile(): Promise<boolean> {
   if (!token) return false;
 
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://fastvoxa.com"}/v1/business`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/business`, {
       method: "GET",
       headers: {
         "Authorization": `Bearer ${token}`,

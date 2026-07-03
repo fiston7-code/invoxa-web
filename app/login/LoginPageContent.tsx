@@ -9,7 +9,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation"; // 1. Ajoutez useSearchParams
 import { useState, useEffect } from "react"; // 2. Ajoutez useEffect
-import { loginUser } from "@/lib/api/auth";
+import { loginUser} from "@/lib/api/auth";
 import { checkHasBusinessProfile } from "@/lib/api/business";
 
 

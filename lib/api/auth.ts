@@ -26,7 +26,7 @@ interface ActivationResponse {
 
 // Frappe : POST /v1/users
 export async function registerUser(payload: RegisterPayload): Promise<void> {
-  const response = await fetch(`${API_BASE_URL}/users`, {
+  const response = await fetch(`${API_BASE_URL}/v1/users`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -57,7 +57,7 @@ export async function registerUser(payload: RegisterPayload): Promise<void> {
 
 // Frappe : POST /v1/tokens/authentication
 export async function loginUser(payload: LoginPayload): Promise<AuthResponse> {
-  const response = await fetch(`${API_BASE_URL}/tokens/authentication`, {
+  const response = await fetch(`${API_BASE_URL}/v1/tokens/authentication`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -75,7 +75,7 @@ export async function loginUser(payload: LoginPayload): Promise<AuthResponse> {
 
 // Frappe : PUT /v1/users/activated
 export async function activateUser(token: string): Promise<ActivationResponse> {
-  const response = await fetch(`${API_BASE_URL}/users/activated`, {
+  const response = await fetch(`${API_BASE_URL}/v1/users/activated`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ token }),

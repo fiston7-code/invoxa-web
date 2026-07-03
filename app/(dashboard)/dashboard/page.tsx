@@ -112,7 +112,7 @@ const handleLogout = () => {
  useEffect(() => {
   async function loadBusinessProfile() {
     try {
-      const token = localStorage.getItem("invoxa_token");  // ✅ Récupère le token
+      const token = localStorage.getItem("invoxa_token");  //  Récupère le token
       
       if (!token) {
         console.error("Pas de token trouvé");
@@ -120,11 +120,11 @@ const handleLogout = () => {
         return;
       }
 
-      // ✅ CORRECT: /v1/business (sans ID) + Token dans le header
+      //  CORRECT: /v1/business (sans ID) + Token dans le header
       const response = await fetch(`${apiUrl}/v1/business`, {
         method: 'GET',
         headers: {
-          "Authorization": `Bearer ${token}`,  // ✅ IMPORTANT!
+          "Authorization": `Bearer ${token}`,  
           "Content-Type": "application/json",
         },
       });
@@ -338,7 +338,7 @@ const handleShareWithPDF = async () => {
             {isPending ? 'Génération du PDF...' : '🚀 Générer la Facture PDF'}
           </button>
 
-           {/* ✅ NOUVEAU: Bouton Logout */}
+           {/* NOUVEAU: Bouton Logout */}
   <button 
     onClick={handleLogout}
     className="px-4 py-2 bg-red-500 text-white text-xs font-semibold rounded-md hover:bg-red-600 transition-colors shadow-sm"
