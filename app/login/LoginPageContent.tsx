@@ -20,6 +20,9 @@ const loginSchema = z.object({
 
 type LucrativeLoginFormValues = z.infer<typeof loginSchema>;
 
+
+//this component is used in the login page to display the login form and handle the login process. It also checks if the user has a business profile and redirects accordingly.
+
 export default function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams(); // 3. Initialisez le hook
