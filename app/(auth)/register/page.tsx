@@ -58,7 +58,7 @@ export default function RegisterPage() {
       >
         <div className="text-center mb-8">
           <Link href="/" className="text-xl font-heading font-bold tracking-wider text-brand-dark-purple">
-            ✦ INVOXA
+            FASTVOXA
           </Link>
           <h2 className="text-2xl font-heading font-bold text-brand-dark-purple mt-4">Créer votre compte</h2>
           <p className="text-xs text-brand-dark-purple/60 mt-1">Prêt à facturer vos clients en quelques secondes</p>
