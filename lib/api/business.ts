@@ -37,15 +37,20 @@ export async function checkHasBusinessProfile(): Promise<boolean> {
   if (!token) return false;
 
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/business`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/business`, {
       method: "GET",
-      headers: {
-        "Authorization": `Bearer ${token}`,
-      },
+      headers: { "Authorization": `Bearer ${token}` },
     });
 
-    // Si le profil existe, le backend renvoie 200 OK
-    return response.ok; 
+    if (!response.ok) return false;
+
+    const data = await response.json();
+    
+    // Logique de validation métier : 
+    // Le profil est "rempli" seulement si le nom et le téléphone existent
+    const profile = data.business_profile || data.business || data;
+    return !!(profile?.name && profile?.phone); 
+    
   } catch (error) {
     return false;
   }

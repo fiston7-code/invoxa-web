@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -7,11 +5,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation"; // 1. Ajoutez useSearchParams
-import { useState, useEffect } from "react"; // 2. Ajoutez useEffect
-import { loginUser} from "@/lib/api/auth";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
+import { loginUser } from "@/lib/api/auth";
 import { checkHasBusinessProfile } from "@/lib/api/business";
-
 
 const loginSchema = z.object({
   email: z.string().email("Adresse email invalide"),
@@ -20,19 +17,32 @@ const loginSchema = z.object({
 
 type LucrativeLoginFormValues = z.infer<typeof loginSchema>;
 
-
-//this component is used in the login page to display the login form and handle the login process. It also checks if the user has a business profile and redirects accordingly.
+// Ce composant est utilisé dans la page de login pour afficher le
+// formulaire et gérer la connexion. Il vérifie aussi si l'utilisateur a
+// déjà un profil d'entreprise pour rediriger en conséquence — que ce soit
+// juste après la connexion, ou dès l'arrivée sur la page s'il a déjà une
+// session valide.
 
 export default function LoginPageContent() {
   const router = useRouter();
-  const searchParams = useSearchParams(); // 3. Initialisez le hook
+  const searchParams = useSearchParams();
   const [apiError, setApiError] = useState<string | null>(null);
 
-  const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm<LucrativeLoginFormValues>({
+  // Tant que `checkingSession` est true, on n'affiche pas le formulaire :
+  // ça évite qu'un utilisateur déjà connecté voie le login apparaître une
+  // fraction de seconde avant d'être redirigé.
+  const [checkingSession, setCheckingSession] = useState(true);
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = useForm<LucrativeLoginFormValues>({
     resolver: zodResolver(loginSchema),
   });
 
-  // 4. Pré-remplir l'email si présent dans l'URL
+  // Pré-remplir l'email si présent dans l'URL
   useEffect(() => {
     const emailFromUrl = searchParams.get("email");
     if (emailFromUrl) {
@@ -40,14 +50,39 @@ export default function LoginPageContent() {
     }
   }, [searchParams, setValue]);
 
+  // Session déjà active ? On vérifie le profil d'entreprise et on
+  // redirige directement, sans repasser par ce formulaire.
+  useEffect(() => {
+    async function redirectIfAlreadyLoggedIn() {
+      const token = localStorage.getItem("invoxa_token");
+
+      if (!token) {
+        setCheckingSession(false);
+        return;
+      }
+
+      try {
+        const hasCompany = await checkHasBusinessProfile();
+        router.replace(hasCompany ? "/dashboard" : "/onboarding/setup-company");
+      } catch (error) {
+        // Token invalide ou expiré : on nettoie et on laisse
+        // l'utilisateur se reconnecter normalement.
+        localStorage.removeItem("invoxa_token");
+        setCheckingSession(false);
+      }
+    }
+
+    redirectIfAlreadyLoggedIn();
+  }, [router]);
+
   const onSubmit = async (data: LucrativeLoginFormValues) => {
     setApiError(null);
     try {
       const resData = await loginUser(data);
       localStorage.setItem("invoxa_token", resData.authentication_token.token);
-      
+
       const hasCompany = await checkHasBusinessProfile();
-      
+
       if (hasCompany) {
         router.push("/dashboard");
       } else {
@@ -58,9 +93,22 @@ export default function LoginPageContent() {
     }
   };
 
+  // Pendant la vérification de session, on affiche un état neutre plutôt
+  // que le formulaire, pour éviter le flash évoqué ci-dessus.
+  if (checkingSession) {
+    return (
+      <div className="min-h-screen bg-brand-off-white flex items-center justify-center px-4 py-12">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-brand-dark-purple/20 border-t-brand-dark-purple rounded-full animate-spin" />
+          <p className="text-xs text-brand-dark-purple/50">Vérification de la session...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-brand-off-white flex items-center justify-center px-4 py-12 select-none">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="max-w-md w-full bg-white border border-brand-beige/50 p-8 rounded-2xl shadow-sm"
@@ -82,9 +130,9 @@ export default function LoginPageContent() {
 
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider text-brand-dark-purple mb-1.5">Adresse Email</label>
-            <input 
-              {...register("email")} 
-              type="email" 
+            <input
+              {...register("email")}
+              type="email"
               className="w-full px-4 py-3 bg-brand-off-white border border-brand-beige/60 rounded-xl text-sm focus:outline-none focus:border-brand-mauve transition-colors text-brand-dark-purple font-medium"
               placeholder="alex@exemple.com"
             />
@@ -98,9 +146,9 @@ export default function LoginPageContent() {
                 Oublié ?
               </Link>
             </div>
-            <input 
-              {...register("password")} 
-              type="password" 
+            <input
+              {...register("password")}
+              type="password"
               className="w-full px-4 py-3 bg-brand-off-white border border-brand-beige/60 rounded-xl text-sm focus:outline-none focus:border-brand-mauve transition-colors text-brand-dark-purple font-medium"
               placeholder="••••••••"
             />

@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+// Importation des icônes depuis le set "Heroicons" (très utilisé avec Tailwind)
+import { HiOutlineLogout, HiOutlineClipboardList, HiOutlineEye, HiOutlineDocumentText, HiOutlineDownload, } from "react-icons/hi";
+import { FaWhatsapp } from 'react-icons/fa';
 
 // ---------------------------------------------------------------------------
 // npm install react-hook-form zod @hookform/resolvers
@@ -16,13 +19,13 @@ import { z } from 'zod';
 const invoiceItemSchema = z.object({
   description: z.string().trim().min(1, 'Description requise'),
   quantity: z.coerce
-    .number({ invalid_type_error: 'Quantité invalide' })
-    .int('La quantité doit être un nombre entier') // Usually, invoice items are discrete units
+    .number({ message: 'Quantité invalide' })
+    .int('La quantité doit être un nombre entier') 
     .min(1, 'Quantité ≥ 1'),
   unit_price: z.coerce
-    .number({ invalid_type_error: 'Prix invalide' })
+    .number({ message: 'Prix invalide' })
     .min(0, 'Prix ≥ 0')
-    .multipleOf(0.01, 'Maximum 2 décimales'), // Prevents floating-point precision issues
+    .multipleOf(0.01, 'Maximum 2 décimales'),
 });
 
 const invoiceFormSchema = z.object({
@@ -90,14 +93,14 @@ const defaultFormValues: InvoiceFormInput = {
   invoiceNumber: '',
   invoiceDate: new Date().toISOString().split('T')[0],
   currency: 'USD',
-  status: 'draft',
+  status: 'paid',
   clientName: '',
   clientPhone: '',
   clientEmail: '',
   clientAddress: '',
   items: [{ description: '', quantity: 1, unit_price: 0 }],
-  noteTitle: 'Merci pour votre achat',
-  noteText: "Ce reçu confirme votre paiement. Conservez-le comme preuve d'achat.",
+  noteTitle: 'Conditions de paiement',
+  noteText: "Paiement dû immédiatement à la réception de cette facture",
 }
 
 export default function InvoiceForm() {
@@ -423,26 +426,39 @@ export default function InvoiceForm() {
             disabled={!lastInvoiceId}
             className="px-4 py-2 bg-green-500 text-white text-xs font-semibold rounded-md hover:bg-green-600 transition-colors disabled:bg-gray-300 shadow-sm"
           >
-            💬 Partager WhatsApp
+            <div className="flex justify-center gap-2">
+              <FaWhatsapp size={20} />
+              <span>Partager WhatsApp</span>
+            </div>
           </button>
           <button
             onClick={() => setShowHistory(true)}
             className="px-4 py-2 bg-[#7B4BB7] text-white text-xs font-semibold rounded-md hover:bg-[#3B1E5D] transition-colors shadow-sm"
           >
-            📋 Historique ({invoices.length})
+             <div className="flex justify-center gap-2">
+              <HiOutlineClipboardList size={20} />
+              <span>Historique({invoices.length})</span>
+            </div>
           </button>
           <button
             onClick={submitInvoice}
             disabled={isPending || loadingBusiness}
             className="px-5 py-2 bg-[#3B1E5D] text-white text-xs font-semibold rounded-md hover:bg-[#7B4BB7] transition-colors disabled:bg-gray-300 shadow-sm"
           >
-            {isPending ? 'Génération du PDF...' : '🚀 Générer la Facture PDF'}
+          <div className="flex justify-center gap-2">
+      <HiOutlineDownload size={20} />
+      <span>Générer le recu PDF</span>
+    </div>
           </button>
           <button
             onClick={handleLogout}
             className="px-4 py-2 bg-red-500 text-white text-xs font-semibold rounded-md hover:bg-red-600 transition-colors shadow-sm"
           >
-            🚪 Déconnexion
+            <div className="flex justify-center gap-2">
+              <HiOutlineLogout size={18} />
+              <span>Déconnexion</span>
+              </div>
+        
           </button>
         </div>
 
@@ -452,7 +468,7 @@ export default function InvoiceForm() {
             aria-label="Historique"
             className="relative p-2.5 rounded-md border border-[#E7D9C4] text-[#3B1E5D] active:bg-[#F5F2EF]"
           >
-            📋
+            <HiOutlineClipboardList size={20} />
             {invoices.length > 0 && (
               <span className="absolute -top-1.5 -right-1.5 bg-[#7B4BB7] text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
                 {invoices.length}
@@ -464,7 +480,7 @@ export default function InvoiceForm() {
             aria-label="Déconnexion"
             className="p-2.5 rounded-md border border-red-200 text-red-500 active:bg-red-50"
           >
-            🚪
+            <HiOutlineLogout size={18} />
           </button>
         </div>
       </header>
@@ -479,7 +495,9 @@ export default function InvoiceForm() {
               : 'bg-white text-[#3B1E5D] border border-[#E7D9C4]'
           }`}
         >
-          📝 Formulaire
+          <div className="flex items-center justify-center gap-1">
+          <HiOutlineDocumentText size={24} /> Formulaire
+        </div>
         </button>
         <button
           onClick={() => setMobileView('preview')}
@@ -489,7 +507,10 @@ export default function InvoiceForm() {
               : 'bg-white text-[#3B1E5D] border border-[#E7D9C4]'
           }`}
         >
-          👁️ Aperçu du reçu
+          <div className="flex items-center justify-center gap-1">
+        <HiOutlineEye size={20} />
+          Aperçu
+          </div>
         </button>
       </div>
 
@@ -559,7 +580,6 @@ export default function InvoiceForm() {
                   {...register('status')}
                   className="w-full text-base sm:text-xs p-2.5 sm:p-2 border border-gray-200 rounded-md bg-white focus:border-[#7B4BB7] outline-none"
                 >
-                  <option value="draft">Brouillon (draft)</option>
                   <option value="sent">Envoyé (sent)</option>
                   <option value="paid">Payé (paid)</option>
                 </select>
@@ -723,7 +743,16 @@ export default function InvoiceForm() {
             disabled={isPending || loadingBusiness}
             className="lg:hidden w-full py-3 bg-[#3B1E5D] text-white text-sm font-semibold rounded-md hover:bg-[#7B4BB7] transition-colors disabled:bg-gray-300 shadow-sm"
           >
-            {isPending ? 'Génération du PDF...' : '🚀 Générer la Facture PDF'}
+          {isPending ? (
+    "Génération du PDF..."
+  ) : (
+    <>
+    <div className="flex justify-center gap-2">
+      <HiOutlineDownload size={20} />
+      <span>Générer le recu PDF</span>
+    </div>
+    </>
+  )}
           </button>
         </form>
 
@@ -1000,14 +1029,20 @@ export default function InvoiceForm() {
           disabled={!lastInvoiceId}
           className="flex-1 py-3 bg-green-500 text-white text-xs font-semibold rounded-md hover:bg-green-600 transition-colors disabled:bg-gray-300 shadow-sm"
         >
-          💬 WhatsApp
+          <div className="flex justify-center gap-2">
+            <FaWhatsapp size={20} />
+            <span> WhatsApp</span>
+            </div> 
         </button>
         <button
           onClick={submitInvoice}
           disabled={isPending || loadingBusiness}
           className="flex-[2] py-3 bg-[#3B1E5D] text-white text-xs font-semibold rounded-md hover:bg-[#7B4BB7] transition-colors disabled:bg-gray-300 shadow-sm"
         >
-          {isPending ? 'Génération...' : '🚀 Générer le reçu'}
+          <div className="flex justify-center gap-2">
+      <HiOutlineDownload size={20} />
+      <span>Générer le recu PDF</span>
+    </div>
         </button>
       </div>
     </div>

@@ -1,21 +1,42 @@
-
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  // null = on ne sait pas encore (avant lecture du localStorage) —
+  // évite d'afficher "Se connecter" une fraction de seconde à un
+  // utilisateur déjà connecté.
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    const syncAuthState = () => {
+      setIsLoggedIn(!!localStorage.getItem("invoxa_token"));
+    };
+
+    syncAuthState();
+
+    // Garde le header synchronisé si le token change dans un autre onglet
+    window.addEventListener("storage", syncAuthState);
+    return () => window.removeEventListener("storage", syncAuthState);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("invoxa_token");
+    setIsLoggedIn(false);
+    setIsOpen(false);
+    router.push("/");
+  };
 
   return (
     <header className="w-full flex flex-col relative z-50">
-      
-
       {/* 2. Barre de navigation principale */}
       <div className="w-full bg-brand-dark-purple text-brand-off-white shadow-md border-b border-brand-dark-purple/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          
           {/* Section Gauche : Logo */}
           <div className="flex items-center gap-6">
             <Link href="/" className="flex items-center gap-2">
@@ -38,26 +59,54 @@ export default function Header() {
             </Link>
           </nav>
 
-          {/* Section Droite : Boutons Connexion / Inscription */}
+          {/* Section Droite : boutons selon l'état de connexion */}
           <div className="hidden md:flex items-center gap-4">
-            <Link href="/login">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="text-brand-off-white hover:text-brand-beige text-sm font-semibold px-4 py-2 cursor-pointer"
-              >
-                Se connecter
-              </motion.button>
-            </Link>
-            <Link href="/register">
-              <motion.button
-                whileHover={{ scale: 1.03, backgroundColor: "#7B4BB7" }}
-                whileTap={{ scale: 0.97 }}
-                className="bg-brand-mauve text-white font-heading font-semibold text-sm px-5 py-2.5 rounded-lg shadow-lg transition-all cursor-pointer"
-              >
-                Créer un compte
-              </motion.button>
-            </Link>
+            {isLoggedIn === null ? (
+              // Espace réservé le temps de lire le localStorage, pour éviter
+              // un saut de mise en page (layout shift).
+              <div className="w-[190px] h-10" aria-hidden="true" />
+            ) : isLoggedIn ? (
+              <>
+                <Link href="/dashboard">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="text-brand-off-white hover:text-brand-beige text-sm font-semibold px-4 py-2 cursor-pointer"
+                  >
+                    Tableau de bord
+                  </motion.button>
+                </Link>
+                <motion.button
+                  whileHover={{ scale: 1.03, backgroundColor: "#7B4BB7" }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={handleLogout}
+                  className="bg-brand-mauve text-white font-heading font-semibold text-sm px-5 py-2.5 rounded-lg shadow-lg transition-all cursor-pointer"
+                >
+                  Déconnexion
+                </motion.button>
+              </>
+            ) : (
+              <>
+                <Link href="/login">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="text-brand-off-white hover:text-brand-beige text-sm font-semibold px-4 py-2 cursor-pointer"
+                  >
+                    Se connecter
+                  </motion.button>
+                </Link>
+                <Link href="/register">
+                  <motion.button
+                    whileHover={{ scale: 1.03, backgroundColor: "#7B4BB7" }}
+                    whileTap={{ scale: 0.97 }}
+                    className="bg-brand-mauve text-white font-heading font-semibold text-sm px-5 py-2.5 rounded-lg shadow-lg transition-all cursor-pointer"
+                  >
+                    Créer un compte
+                  </motion.button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Bouton Menu Hamburger Mobile */}
@@ -75,7 +124,6 @@ export default function Header() {
               </svg>
             </button>
           </div>
-
         </div>
       </div>
 
@@ -102,25 +150,39 @@ export default function Header() {
               <hr className="border-brand-beige/10" />
 
               <div className="flex flex-col gap-3">
-                <Link href="/login" onClick={() => setIsOpen(false)} className="w-full">
-                  <button className="w-full text-center py-2.5 text-brand-off-white font-semibold border border-brand-off-white/20 rounded-lg cursor-pointer">
-                    Se connecter
-                  </button>
-                </Link>
-                <Link href="/register" onClick={() => setIsOpen(false)} className="w-full">
-                  <button className="w-full text-center py-2.5 bg-brand-mauve text-white font-heading font-semibold rounded-lg cursor-pointer">
-                    Créer un compte
-                  </button>
-                </Link>
-
-                
+                {isLoggedIn ? (
+                  <>
+                    <Link href="/dashboard" onClick={() => setIsOpen(false)} className="w-full">
+                      <button className="w-full text-center py-2.5 text-brand-off-white font-semibold border border-brand-off-white/20 rounded-lg cursor-pointer">
+                        Tableau de bord
+                      </button>
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-center py-2.5 bg-brand-mauve text-white font-heading font-semibold rounded-lg cursor-pointer"
+                    >
+                      Déconnexion
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link href="/login" onClick={() => setIsOpen(false)} className="w-full">
+                      <button className="w-full text-center py-2.5 text-brand-off-white font-semibold border border-brand-off-white/20 rounded-lg cursor-pointer">
+                        Se connecter
+                      </button>
+                    </Link>
+                    <Link href="/register" onClick={() => setIsOpen(false)} className="w-full">
+                      <button className="w-full text-center py-2.5 bg-brand-mauve text-white font-heading font-semibold rounded-lg cursor-pointer">
+                        Créer un compte
+                      </button>
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-
-      
     </header>
   );
 }
