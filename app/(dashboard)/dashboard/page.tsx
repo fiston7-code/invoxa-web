@@ -965,7 +965,7 @@ export default function InvoiceForm() {
                         <td className="p-2 sm:p-3 text-gray-700 font-medium whitespace-pre-line">
                           {item?.description || '[Libellé prestation]'}
                         </td>
-                        <td className="p-2 sm:p-3 text-center text-gray-500">{item?.quantity}</td>
+                        <td className="p-2 sm:p-3 text-center text-gray-500">{String(item?.quantity ?? '')}</td>
                         <td className="p-2 sm:p-3 text-right text-gray-900 font-bold font-mono">
                           {((Number(item?.quantity) || 0) * (Number(item?.unit_price) || 0)).toFixed(2)}{' '}
                           {formValues.currency}
