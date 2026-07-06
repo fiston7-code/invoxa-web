@@ -4,6 +4,7 @@ import { Poppins, Open_Sans } from "next/font/google";
 import {Navbar} from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import "./globals.css";
+import WhatsAppButton from "@/components/whatsappButton ";
 
 // Police pour les titres (Headings)
 const fontHeading = Poppins({
@@ -42,7 +43,7 @@ export default function RootLayout({
 
         {children}
         <Footer />
-        
+        <WhatsAppButton />
       </body>
     </html>
   );
