@@ -13,7 +13,7 @@ import { registerUser } from "@/lib/api/auth";
 const registerSchema = z.object({
   name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
   email: z.string().email("Adresse email invalide"),
-  password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
+  password: z.string().min(8, "Le mot de passe doit contenir au moins 8 caractères"),
   passwordConfirmation: z.string().min(1, "Veuillez confirmer votre mot de passe"),
 }).refine((data) => data.password === data.passwordConfirmation, {
   message: "Les mots de passe ne correspondent pas",

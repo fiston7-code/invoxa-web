@@ -47,10 +47,16 @@ export default function BusinessProfilePage() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsPending(true);
-    const token = localStorage.getItem("invoxa_token");
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  if (!formData.name.trim()) {
+    alert("Le nom de l'entreprise est obligatoire.");
+    return;
+  }
+
+  setIsPending(true);
+  const token = localStorage.getItem("invoxa_token");
 
     try {
       const response = await fetch(`${apiUrl}/v1/business`, {
@@ -97,16 +103,26 @@ export default function BusinessProfilePage() {
           </div>
 
           {/* Inputs */}
-          {[ {key: 'name', label: 'Nom de l\'entreprise'}, {key: 'rccm', label: 'RCCM'}, {key: 'address', label: 'Adresse'}, {key: 'phone', label: 'Téléphone'}, {key: 'email', label: 'Email Pro'} ].map((field) => (
-            <div key={field.key}>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-brand-dark-purple mb-1.5">{field.label}</label>
-              <input 
-                className="w-full px-4 py-3 bg-brand-off-white border border-brand-beige/60 rounded-xl text-sm focus:outline-none focus:border-brand-mauve transition-colors text-brand-dark-purple font-medium"
-                value={(formData as any)[field.key]}
-                onChange={e => setFormData({...formData, [field.key]: e.target.value})}
-              />
-            </div>
-          ))}
+        {[
+  { key: 'name', label: "Nom de l'entreprise", required: true },
+  { key: 'rccm', label: 'RCCM (optionnel)', required: false },
+  { key: 'address', label: 'Adresse (optionnel)', required: false },
+  { key: 'phone', label: 'Téléphone (optionnel)', required: false },
+  { key: 'email', label: 'Email Pro (optionnel)', required: false },
+].map((field) => (
+  <div key={field.key}>
+    <label className="block text-xs font-semibold uppercase tracking-wider text-brand-dark-purple mb-1.5">
+      {field.label}
+      {field.required && <span className="text-red-500 ml-0.5">*</span>}
+    </label>
+    <input
+      className="w-full px-4 py-3 bg-brand-off-white border border-brand-beige/60 rounded-xl text-sm focus:outline-none focus:border-brand-mauve transition-colors text-brand-dark-purple font-medium"
+      value={(formData as any)[field.key]}
+      required={field.required}
+      onChange={e => setFormData({ ...formData, [field.key]: e.target.value })}
+    />
+  </div>
+))}
 
           <motion.button
             whileHover={{ scale: 1.01 }}
