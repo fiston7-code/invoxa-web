@@ -1,4 +1,6 @@
 
+
+
 'use client';
 
 import React, { useEffect, useState, useTransition } from 'react';
@@ -9,6 +11,8 @@ import { z } from 'zod';
 // Importation des icônes depuis le set "Heroicons" (très utilisé avec Tailwind)
 import { HiOutlineLogout, HiOutlineClipboardList, HiOutlineEye, HiOutlineDocumentText, HiOutlineDownload, } from "react-icons/hi";
 import { FaWhatsapp } from 'react-icons/fa';
+import { HiOutlineCog } from 'react-icons/hi';
+import Link from 'next/link';
 
 // ---------------------------------------------------------------------------
 // npm install react-hook-form zod @hookform/resolvers
@@ -17,6 +21,9 @@ import { FaWhatsapp } from 'react-icons/fa';
 // ---------------------------------------------------------------------------
 // Schéma de validation
 // ---------------------------------------------------------------------------
+
+const BUSINESS_PROFILE_ROUTE = '/business/profile'; 
+
 const invoiceItemSchema = z.object({
   description: z.string().trim().min(1, 'Description requise'),
   quantity: z.coerce
@@ -139,6 +146,8 @@ export default function InvoiceForm() {
     defaultValues: defaultFormValues,
     mode: 'onBlur',
   });
+
+
 
   const { fields, append, remove } = useFieldArray({ control, name: 'items' });
 
@@ -422,6 +431,15 @@ export default function InvoiceForm() {
         </div>
 
         <div className="hidden lg:flex items-center gap-2 shrink-0">
+          <Link
+  href={BUSINESS_PROFILE_ROUTE}
+  className="px-4 py-2 bg-white text-[#3B1E5D] text-xs font-semibold rounded-md border border-[#E7D9C4] hover:bg-[#F5F2EF] transition-colors shadow-sm"
+>
+  <div className="flex justify-center gap-2">
+    <HiOutlineCog size={18} />
+    <span>Profil entreprise</span>
+  </div>
+</Link>
           <button
             onClick={handleShareWithPDF}
             disabled={!lastInvoiceId}
@@ -463,6 +481,8 @@ export default function InvoiceForm() {
           </button>
         </div>
 
+        {/* header sur mobile  */}
+
         <div className="flex lg:hidden items-center gap-1.5 shrink-0">
           <button
             onClick={() => setShowHistory(true)}
@@ -483,6 +503,15 @@ export default function InvoiceForm() {
           >
             <HiOutlineLogout size={18} />
           </button>
+
+          <Link
+  href={BUSINESS_PROFILE_ROUTE}
+  aria-label="Profil entreprise"
+  className="p-2.5 rounded-md border border-[#E7D9C4] text-[#3B1E5D] active:bg-[#F5F2EF]"
+>
+  <HiOutlineCog size={20} />
+</Link>
+
         </div>
       </header>
 
