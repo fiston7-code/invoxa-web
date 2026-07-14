@@ -9,6 +9,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { loginUser } from "@/lib/api/auth";
 import { checkHasBusinessProfile } from "@/lib/api/business";
+import GoogleSignInButton from "@/components/google-signin-button";
 
 const loginSchema = z.object({
   email: z.string().email("Adresse email invalide"),
@@ -120,6 +121,13 @@ export default function LoginPageContent() {
           <h2 className="text-2xl font-heading font-bold text-brand-dark-purple mt-4">Ravi de vous revoir</h2>
           <p className="text-xs text-brand-dark-purple/60 mt-1">Accédez à vos outils de generation de recu instantanée</p>
         </div>
+
+         {/* Connexion Google — crée directement un compte activé, sans passer
+                    par le flux "vérifier votre email" puisque Google a déjà vérifié
+                    l'adresse à notre place. */}
+                <div className="mb-5">
+                  <GoogleSignInButton onError={setApiError} />
+                </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           {apiError && (

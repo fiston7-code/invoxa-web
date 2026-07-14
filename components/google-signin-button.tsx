@@ -19,6 +19,15 @@ declare global {
   }
 }
 
+// Ces deux variables vivent au niveau du module (pas du composant) : elles
+// persistent tant que l'onglet reste ouvert, y compris à travers les
+// navigations côté client entre /login et /register. C'est justement ce
+// qu'on veut : initialize() ne doit tourner qu'une fois par chargement de
+// page, mais le gestionnaire de credential doit toujours pointer vers le
+// composant actuellement monté (pas une instance d'une page précédente).
+let googleClientInitialized = false;
+let currentCredentialHandler: ((response: { credential: string }) => void) | null = null;
+
 interface GoogleSignInButtonProps {
   onError?: (message: string) => void;
 }
@@ -64,14 +73,27 @@ export default function GoogleSignInButton({ onError }: GoogleSignInButtonProps)
       }
     }
 
+    // Mis à jour à CHAQUE montage (donc à chaque navigation vers cette
+    // page), même si initialize() lui-même ne s'exécute qu'une fois.
+    currentCredentialHandler = handleCredentialResponse;
+
     function initializeGoogleButton() {
       if (!window.google || !buttonRef.current) return;
 
-      window.google.accounts.id.initialize({
-        client_id: clientId,
-        callback: handleCredentialResponse,
-      });
+      if (!googleClientInitialized) {
+        window.google.accounts.id.initialize({
+          client_id: clientId,
+          // Indirection stable : le vrai travail est délégué à
+          // currentCredentialHandler, qui pointe toujours vers la page
+          // actuellement affichée.
+          callback: (response: { credential: string }) => currentCredentialHandler?.(response),
+        });
+        googleClientInitialized = true;
+      }
 
+      // renderButton, contrairement à initialize, est fait pour être
+      // rappelé à chaque fois qu'on veut afficher le bouton dans un
+      // nouvel élément du DOM — donc toujours exécuté ici.
       window.google.accounts.id.renderButton(buttonRef.current, {
         theme: 'outline',
         size: 'large',
