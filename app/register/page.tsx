@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { registerUser } from "@/lib/api/auth";
+import GoogleSignInButton from "@/components/google-signin-button";
 
 const registerSchema = z.object({
   name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
@@ -62,6 +63,14 @@ export default function RegisterPage() {
           </Link>
           <h2 className="text-2xl font-heading font-bold text-brand-dark-purple mt-4">Créer votre compte</h2>
           <p className="text-xs text-brand-dark-purple/60 mt-1">Prêt à facturer vos clients en quelques secondes</p>
+        </div>
+
+
+        {/* Connexion Google — crée directement un compte activé, sans passer
+            par le flux "vérifier votre email" puisque Google a déjà vérifié
+            l'adresse à notre place. */}
+        <div className="mb-5">
+          <GoogleSignInButton onError={setApiError} />
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
@@ -178,3 +187,5 @@ export default function RegisterPage() {
     </div>
   );
 }
+
+
